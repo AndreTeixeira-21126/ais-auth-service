@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>User Profile</h2>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title" id="username">Username</h5>
+                <h6 class="card-subtitle mb-2 text-muted" id="email">Email</h6>
+                <p class="card-text" id="name">Name</p>
+                <p class="card-text" id="birthdate">Birth Date</p>
+                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Account</button>
+                <button type="button" class="btn btn-primary" onclick="location.href='update.html'">Update Profile</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete your account? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="delete">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.onload = async () => {
+            const token = localStorage.getItem('token');
+            console.log(token)
+            const response = await fetch('/api/users/profile', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            if(response.status === 200) {
+            
+                document.getElementById('username').innerHTML = data.username;
+                document.getElementById('email').innerHTML = data.email;
+                document.getElementById('name').innerHTML = `${data.first_name} ${data.last_name}`;
+                document.getElementById('birthdate').innerHTML = new Date(data.birth_date).toISOString().split('T')[0];
+
+            } else {
+                alert(data.message);
+            }
+        }
+
+    document.getElementById('delete').addEventListener('click', async () => {
+
+    const token = localStorage.getItem('token');
+    const response = await fetch('/api/users/delete', {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    const data = await response.json();
+    if (response.status === 200) {
+
+        $('#deleteModal').modal('hide');
+        
+        // Remove token from local storage
+        localStorage.removeItem('token');
+
+        setTimeout(() => {
+            // Redirect to login or home page
+            window.location.href = '/login.html';
+        }, 1000);
+        
+    } else {
+        // Failed to delete the account
+        alert(data.message);
+    }
+});
+
+    </script>
+</body>
+</html>

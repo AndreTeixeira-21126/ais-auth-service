@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Form</title>
+  <!-- Add Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Registration Form</h1>
+    <form id="upform">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" class="form-control" id="username" placeholder="Enter username">
+      </div>
+      <div class="form-group">
+        <label for="first_name">First Name</label>
+        <input type="text" class="form-control" id="first_name" placeholder="Enter first name">
+      </div>
+      <div class="form-group">
+        <label for="last_name">Last Name</label>
+        <input type="text" class="form-control" id="last_name" placeholder="Enter last name">
+      </div>
+      <div class="form-group">
+        <label for="birth_date">Birth Date</label>
+        <input type="date" class="form-control" id="birth_date">
+    </div>
+      <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+    <script>
+      window.onload = async () => {
+        if(!localStorage.getItem('token')) {
+            window.location.href = '/login.html';
+        }
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/users/profile', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+        const data = await response.json();
+        console.log(data)
+        if(response.status === 200) {
+            
+            document.getElementById('username').value = data.username;
+            document.getElementById('first_name').value= data.first_name;
+            document.getElementById('last_name').value = data.last_name;
+
+            document.getElementById('birth_date').value = data.birth_date.split('T')[0];
+
+        } else {
+            alert(data.message);
+        }
+        
+      }
+        
+    const form = document.getElementById('upform');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const birth_date = document.getElementById('birth_date').value;
+            const first_name = document.getElementById('first_name').value;
+            const last_name = document.getElementById('last_name').value;
+            
+            const token = localStorage.getItem('token');
+            //nativo do browser
+            const response = await fetch('/api/users/update', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, birth_date, first_name, last_name })
+            });
+            const data = await response.json();
+            console.log(data);
+            alert(data.message);
+        });
+    </script>
+  </div>
+​
+  <!-- Add Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
