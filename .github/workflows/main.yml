@@ -1,0 +1,19 @@
+on:
+  push:
+    branches:
+    - main
+jobs:
+  my_job:
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.0
+      - name: Checkout
+
+      - name: Run docker login
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Image
+        run: docker build -t grandiosoteixas/ais-auth-service:latest .
+      - name: Deploy
+        run: docker push grandiosoteixas/ais-auth-service:latest
